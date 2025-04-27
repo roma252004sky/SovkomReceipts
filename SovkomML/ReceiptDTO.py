@@ -2,7 +2,7 @@ import json
 
 class ReceiptDTO:
     def __init__(self, json_data):
-        self.shop = json_data['retailPlace']
+        self.shop = json.get('retailPlace', json.get('user'))
         self.total = json_data['totalSum'] / 100
         self.date = json_data['dateTime']
         self.items = ItemDTO.json_to_items(json_data["items"])
