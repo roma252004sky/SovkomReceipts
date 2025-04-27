@@ -1,0 +1,11 @@
+flask
+opencv-python-headless
+qreader
+selenium>=4.0
+transformers
+torch
+webdriver-manager
+python-dotenv
+requests
+numpy
+confluent_kafka

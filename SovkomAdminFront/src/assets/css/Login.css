@@ -1,0 +1,61 @@
+/* App.css */
+
+.login-page {
+    background-color: red;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 0 20px;
+    box-sizing: border-box;
+  }
+  
+  .container {
+    width: 100%;
+    max-width: 1200px; /* Ограничиваем максимальную ширину контейнера */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+  
+  .header {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 20px 0;
+    margin-bottom: 40px; /* Добавим отступ снизу, чтобы шапка не слипалась с формой */
+  }
+  
+  .logo {
+    width: 150px;
+    height: auto;
+  }
+  
+  .login-container {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 100%;
+    max-width: 400px; /* Максимальная ширина формы */
+    justify-content: center;
+  }
+  
+  h2 {
+    color: #000;
+    margin-bottom: 15px;
+    font-size: 20px;
+    font-weight: bold;
+  }
+  
+  form .ant-form-item {
+    margin-bottom: 15px; /* Меньше отступы между элементами формы */
+  }
+  
+  .ant-btn {
+    margin-top: 20px;
+  }
+  

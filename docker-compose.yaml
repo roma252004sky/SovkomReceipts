@@ -1,0 +1,170 @@
+services:
+  clickhouse-server:
+    image: clickhouse/clickhouse-server:latest
+    container_name: clickhouse-server
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+      - "9009:9009"
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+      - clickhouse_log:/var/log/clickhouse-server
+      - ./SovkomClickHouse/clickhouse-config.xml:/etc/clickhouse-server/config.d/custom-config.xml
+      - ./SovkomClickHouse/clickhouse-users.xml:/etc/clickhouse-server/users.d/custom-users.xml
+    environment:
+      - TZ=UTC
+      - CLICKHOUSE_DB=default
+      - CLICKHOUSE_USER=admin
+      - CLICKHOUSE_PASSWORD=admin
+      - CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT=1
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "-q", "localhost:8123/ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+  kafka-1:
+    image: confluentinc/cp-kafka:7.6.0
+    hostname: kafka-1
+    environment:
+      KAFKA_NODE_ID: 1
+      CLUSTER_ID: "4tL3jvD7QlWq6XoP9cRb2A"
+      KAFKA_PROCESS_ROLES: controller,broker
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-1:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka-1:9093,2@kafka-2:9093,3@kafka-3:9093"
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+      KAFKA_MESSAGE_MAX_BYTES: 524288000
+      KAFKA_REPLICA_FETCH_MAX_BYTES: 524288000
+      KAFKA_FETCH_MESSAGE_MAX_BYTES: 524288000
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+    volumes:
+      - kafka-data-1:/var/lib/kafka/data
+
+  kafka-2:
+    image: confluentinc/cp-kafka:7.6.0
+    hostname: kafka-2
+    environment:
+      KAFKA_NODE_ID: 2
+      CLUSTER_ID: "4tL3jvD7QlWq6XoP9cRb2A"
+      KAFKA_PROCESS_ROLES: controller,broker
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-2:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka-1:9093,2@kafka-2:9093,3@kafka-3:9093"
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+      KAFKA_MESSAGE_MAX_BYTES: 524288000
+      KAFKA_REPLICA_FETCH_MAX_BYTES: 524288000
+      KAFKA_FETCH_MESSAGE_MAX_BYTES: 524288000
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+    volumes:
+      - kafka-data-2:/var/lib/kafka/data
+    depends_on:
+      - kafka-1
+
+  kafka-3:
+    image: confluentinc/cp-kafka:7.6.0
+    hostname: kafka-3
+    environment:
+      KAFKA_NODE_ID: 3
+      CLUSTER_ID: "4tL3jvD7QlWq6XoP9cRb2A"
+      KAFKA_PROCESS_ROLES: controller,broker
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-3:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka-1:9093,2@kafka-2:9093,3@kafka-3:9093"
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+      KAFKA_MESSAGE_MAX_BYTES: 524288000
+      KAFKA_REPLICA_FETCH_MAX_BYTES: 524288000
+      KAFKA_FETCH_MESSAGE_MAX_BYTES: 524288000
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+    volumes:
+      - kafka-data-3:/var/lib/kafka/data
+    depends_on:
+      - kafka-1
+      - kafka-2
+  eureka-1:
+    hostname: eureka-1
+    build:
+      context: ./SovkomEurekaServer
+      dockerfile: Dockerfile
+    ports:
+      - "8761:8761"
+    environment:
+      EUREKA_SECOND: eureka-2
+      EUREKA_USER: admin
+      EUREKA_PASSWORD: admin
+      EUREKA_HOST: eureka-1
+  eureka-2:
+    hostname: eureka-2
+    ports:
+      - "8762:8761"
+    build:
+      context: ./SovkomEurekaServer
+      dockerfile: Dockerfile
+    environment:
+      EUREKA_SECOND: eureka-1
+      EUREKA_USER: admin
+      EUREKA_PASSWORD: admin
+      EUREKA_HOST: eureka-2
+  gateway:
+    build:
+      context: ./SovkomGateway
+      dockerfile: Dockerfile
+    container_name: sovkom_gateway
+    ports:
+      - "80:80"
+    environment:
+      EUREKA_URL: http://admin:admin@eureka-1:8761/eureka/,http://admin:admin@eureka-2:8761/eureka/
+  main:
+    build:
+      context: ./SovkomMain
+      dockerfile: Dockerfile
+    ports:
+      - "8080"
+    deploy:
+      replicas: 4
+    environment:
+      KAFKA_SERVERS: kafka-1:9092,kafka-2:9092,kafka-3:9092
+      EUREKA_URL: http://admin:admin@eureka-1:8761/eureka/,http://admin:admin@eureka-2:8761/eureka/
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: sovkom-kraft
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-1:9092,kafka-2:9092,kafka-3:9092
+      KAFKA_CLUSTERS_0_KRAFT: "true"
+    depends_on:
+      - kafka-1
+      - kafka-2
+      - kafka-3
+  ml:
+    build:
+      context: ./SovkomML
+      dockerfile: Dockerfile
+    deploy:
+      replicas: 4
+volumes:
+  clickhouse_data:
+  clickhouse_log:
+  kafka-data-1:
+  kafka-data-2:
+  kafka-data-3:

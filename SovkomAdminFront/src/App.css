@@ -1,0 +1,187 @@
+/* App.css */
+.App {
+  display: flex;
+  height: 100vh;
+}
+
+.content {
+  flex-grow: 1;
+  padding: 20px;
+  transition: margin-left 0.3s ease;
+  margin-left: 100px;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.header {
+  display: flex;
+  justify-content: flex-start;
+  padding: 20px 0;
+  width: 100%;
+}
+
+.logo {
+  width: 40px;
+  height: auto;
+  margin-left: 10px;
+}
+
+.sidebar {
+  width: 60px;
+  background-color: #4821a1;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 20px 0;
+  transition: width 0.3s ease;
+  position: fixed;
+  height: 100%;
+  left: 0;
+  top: 0;
+  z-index: 10;
+}
+
+.sidebar:hover {
+  width: 200px;
+}
+
+.sidebar-item {
+  padding: 15px;
+  cursor: pointer;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  width: 100%;
+  opacity: 1;
+  transition: opacity 0.3s ease 0.3s;
+}
+
+.sidebar-item a {
+  color: white;
+}
+
+.sidebar-item a:hover {
+  color: #e0e0e0;
+}
+
+.sidebar-item span {
+  position: absolute;
+  opacity: 0;
+  transform: translate(100%, 0);
+  pointer-events: none;
+  margin-left: 10px;
+  transition: all 0.3s ease;
+}
+
+.sidebar:hover .sidebar-item span {
+  transform: translate(0, 0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.sidebar-item i {
+  font-size: 24px;
+  color: white;
+}
+
+.sidebar:hover .sidebar-item {
+  opacity: 1;
+}
+
+.table-container {
+}
+
+.sidebar:hover + .table-container {
+  margin-left: 200px;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+}
+
+/* Шапка таблицы */
+.ant-table-thead > tr > th {
+  background-color: #4821a1 !important;
+  color: white !important;
+  text-align: center;
+}
+
+/* Кнопки в таблице */
+.ant-btn-primary {
+  background-color: #4821a1 !important;
+  border-color: #4821a1 !important;
+}
+
+.ant-btn-primary:hover {
+  background-color: #3b1b84 !important;
+  border-color: #3b1b84 !important;
+}
+
+/* Уменьшаем отступы в ячейках */
+.ant-table-tbody > tr > td {
+  padding: 8px !important; /* Было 16px */
+}
+
+/* Делаем шапку таблицы тоже компактной */
+.ant-table-thead > tr > th {
+  padding: 10px !important;
+}
+
+/* Центрирование кнопки "Подробнее" */
+.centered-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.centered-button button {
+  margin: 0;
+}
+
+.background-woman {
+  position: fixed;
+  bottom: 0;
+  right: -70px;
+  width: 200px;
+}
+
+.refresh-container {
+  display: flex;
+  justify-content: flex-end;  /* Кнопка справа */
+  margin-bottom: 15px;
+}
+
+.refresh-button {
+  background-color: #fff; /* Светло-серый фон */
+  border-radius: 8px; /* Закругленные края */
+  padding: 8px 16px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Расстояние между иконкой и текстом */
+}
+
+.refresh-button:hover {
+  background-color: #e0e0e0; /* Темнее при наведении */
+}
+
+.high-risk-row {
+  background-color: #ffcccc !important; /* Светло-красный */
+}
+
+.medium-risk-row {
+  background-color: #fffacd !important; /* Светло-желтый */
+}
+
+.low-risk-row {
+  background-color: #ccffcc !important; /* Светло-зеленый */
+}
+
