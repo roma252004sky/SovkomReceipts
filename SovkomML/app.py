@@ -10,7 +10,6 @@ from receipt_category import get_common_category, categories
 class ReceiptProcessor:
     def __init__(self, kafka_config):
         self.consumer = Consumer(kafka_config)
-        # Добавляем продюсер с теми же настройками
         self.producer = Producer(kafka_config)
 
     def _delivery_report(self, err, msg):
@@ -51,16 +50,14 @@ class ReceiptProcessor:
                 receipt_dto.user_id = user_id
                 receipt_dto.load_id = load_id
 
-                # Подготавливаем данные для отправки
                 payload = receipt_dto.to_json().encode('utf-8')
 
-                # Отправляем в продюсер
                 self.producer.produce(
                     topic='postOCR',
                     value=payload,
                     callback=self._delivery_report
                 )
-                self.producer.poll(0)  # Неблокирующая отправка
+                self.producer.poll(0)
 
                 return {
                     'user_id': user_id,
@@ -84,7 +81,6 @@ class ReceiptProcessor:
             while True:
                 msg = self.consumer.poll(timeout=1.0)
                 if msg is None:
-                    # Периодически сбрасываем продюсер
                     self.producer.flush()
                     continue
 
@@ -104,16 +100,14 @@ class ReceiptProcessor:
             print("Shutting down consumer...")
         finally:
             self.consumer.close()
-            self.producer.flush(10)  # Очищаем буфер перед выходом
-
+            self.producer.flush(10) 
 
 if __name__ == '__main__':
     kafka_config = {
         'bootstrap.servers': 'kafka-1:9092,kafka-2:9092,kafka-3:9092',
         'group.id': 'receipt-processor-group',
         'auto.offset.reset': 'earliest',
-        # Дополнительные настройки продюсера при необходимости
-        'message.max.bytes': 104857600,  # 10MB максимальный размер сообщения
+        'message.max.bytes': 104857600,
     }
 
     processor = ReceiptProcessor(kafka_config)

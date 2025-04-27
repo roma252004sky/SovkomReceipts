@@ -1,15 +1,12 @@
 from transformers import pipeline
 from collections import defaultdict
 
-# Инициализация модели
 classifier = pipeline(
     task="zero-shot-classification",
     model="MoritzLaurer/mDeBERTa-v3-base-mnli-xnli",
     device=-1
 )
 
-# Список категорий (можно расширить)
-# Ваши категории
 categories = [
     "Косметика и парфюмерия", "Одежда и аксессуары ",
     "Электроника", "Ювелирные изделия",
@@ -27,7 +24,6 @@ categories = [
 
 
 def get_common_category(product_list, categories):
-    # Собираем статистику по категориям
     category_stats = defaultdict(float)
 
     for product in product_list:
@@ -35,16 +31,13 @@ def get_common_category(product_list, categories):
         best_category = result['labels'][0]
         confidence = result['scores'][0]
 
-        # Взвешенное суммирование (можно заменить на простое подсчет количества)
         category_stats[best_category] += confidence
 
-    # Выбираем категорию с максимальным весом
     common_category = max(category_stats.items(), key=lambda x: x[1])[0]
 
     return common_category, dict(category_stats)
 
 
-# Пример использования
 # products = [
 #     'ПРОСТОКВАШИНО Сметана 15% 300г пл/ст (Да',
 #     'Хлеб Крестьянский 2 сорт формовой 450г фл/п',
