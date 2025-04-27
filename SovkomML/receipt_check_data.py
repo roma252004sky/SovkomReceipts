@@ -11,13 +11,11 @@ import logging
 
 from ReceiptDTO import ReceiptDTO
 
-# Настройка логгера
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-# Константы
-DOWNLOAD_DIR = os.path.join(os.getcwd(), 'downloads')  # Папка для загрузок
-os.makedirs(DOWNLOAD_DIR, exist_ok=True)  # Создаем папку, если не существует
+DOWNLOAD_DIR = os.path.join(os.getcwd(), 'downloads')
+os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
 def get_latest_downloaded_file(wait_time=30):
     """Получает последний скачанный файл из директории"""
@@ -94,7 +92,6 @@ def get_receipt_info(qr_data):
         textarea.clear()
         textarea.send_keys(qr_data)
 
-        # Снятие фокуса с поля ввода
         driver.find_element(By.TAG_NAME, 'body').click()
         debug_info(driver)
 
@@ -103,7 +100,6 @@ def get_receipt_info(qr_data):
             EC.presence_of_element_located((By.CSS_SELECTOR, "button.b-checkform_btn-send.btn-primary"))
         )
 
-        # Проверка состояния кнопки
         WebDriverWait(driver, 5).until(
             lambda d: submit_button.is_displayed() and submit_button.is_enabled()
         )
@@ -112,7 +108,6 @@ def get_receipt_info(qr_data):
         driver.execute_script("arguments[0].scrollIntoView({block: 'center', behavior: 'smooth'});", submit_button)
         actions.move_to_element(submit_button).pause(0.1).perform()
 
-        # Комбинированная стратегия клика
         try:
             logger.info("Попытка 1: Клик через ActionChains")
             actions.click(submit_button).perform()
@@ -130,21 +125,17 @@ def get_receipt_info(qr_data):
         actions.move_to_element(download_button).pause(0.01).perform()
         driver.execute_script("arguments[0].click();", download_button)
 
-        # Клик на кнопку скачивания JSON
         download_button_second = WebDriverWait(driver, 30).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "a.b-check_btn-json"))
         )
         driver.execute_script("arguments[0].click();", download_button_second)
 
-        # Ожидание завершения загрузки файла
         downloaded_file = get_latest_downloaded_file()
         logger.info(f"Скачан файл: {downloaded_file}")
 
-        # Чтение и парсинг JSON
         with open(downloaded_file, 'r', encoding='utf-8') as f:
             data = json.load(f)
 
-        # Удаление временного файла
         os.remove(downloaded_file)
 
         return data
@@ -157,7 +148,6 @@ def get_receipt_info(qr_data):
         driver.quit()
 
 
-# Пример использования
 # qr_data = "t=20221227T2025&s=262.84&fn=9960440502956695&i=34465&fp=1782149244&n=1"
 # result = get_receipt_info(qr_data)
 # print(ReceiptDTO(result).to_json())
